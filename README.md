@@ -13,7 +13,8 @@ Each project demonstrates concepts of:
 - Finite state machines (FSMs)  
 - Counters, registers, and timing circuits  
 - Control and automation systems  
-** linkedinpost : to see and verify the output → https://www.linkedin.com/posts/manikanta-raghava-naragam-0498182ba_simpleverilogprojectspart1-activity-7369361224297345027-5sID?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEymxzkBbqL1ivuxKNThWRUo4vYjUdJWi0w **
+**linkedinpost : to see and verify the output → https://www.linkedin.com/posts/manikanta-raghava-naragam-0498182ba_simpleverilogprojectspart1-activity-7369361224297345027-5sID?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEymxzkBbqL1ivuxKNThWRUo4vYjUdJWi0w**
+  
 The projects are organized for clarity and reusability, allowing you to **explore, learn, and extend** the designs.
 
 ---
