@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Vending Machine FSM (Verilog Aligned)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .state-circle {
+            transition: all 0.3s ease-in-out;
+        }
+        .current-state .state-circle {
+            fill: #0ea5e9; /* sky-500 */
+            stroke: #0284c7; /* sky-600 */
+            stroke-width: 4px;
+            transform: scale(1.1);
+        }
+        .current-state text {
+            fill: white;
+            font-weight: 700;
+        }
+        .transition-path {
+            transition: all 0.2s ease-in-out;
+        }
+        .active-transition {
+            stroke: #f59e0b; /* amber-500 */
+            stroke-width: 4px;
+        }
+        .btn {
+            transition: all 0.2s ease;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .output-box {
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .output-active {
+            background-color: #10b981; /* emerald-500 */
+            color: white;
+            transform: scale(1.05);
+        }
+        #log-container {
+            height: 120px;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-6xl mx-auto bg-slate-800 rounded-2xl shadow-2xl p-6 md:p-8 grid grid-cols-1 lg:grid-cols-5 gap-8">
+        
+        <div class="lg:col-span-3 bg-slate-900/50 rounded-lg p-4 flex items-center justify-center">
+            <svg id="fsm-diagram" viewBox="0 0 600 500" class="w-full h-full" aria-labelledby="diagram-title" role="img">
+                <title id="diagram-title">An interactive state diagram of the vending machine FSM.</title>
+                <defs>
+                    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#94a3b8" />
+                    </marker>
+                    <marker id="arrowhead-active" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#f59e0b" />
+                    </marker>
+                </defs>
+
+                <g id="state-S0" class="cursor-pointer">
+                    <circle class="state-circle" cx="300" cy="60" r="40" fill="#475569" stroke="#64748b" stroke-width="2"/>
+                    <text x="300" y="65" text-anchor="middle" font-weight="600" font-size="16" fill="#e2e8f0">S0</text>
+                    <text x="300" y="85" text-anchor="middle" font-size="12" fill="#94a3b8">₹0</text>
+                </g>
+                <g id="state-S5" class="cursor-pointer">
+                    <circle class="state-circle" cx="520" cy="250" r="40" fill="#475569" stroke="#64748b" stroke-width="2"/>
+                    <text x="520" y="255" text-anchor="middle" font-weight="600" font-size="16" fill="#e2e8f0">S5</text>
+                    <text x="520" y="275" text-anchor="middle" font-size="12" fill="#94a3b8">₹5</text>
+                </g>
+                <g id="state-S10" class="cursor-pointer">
+                    <circle class="state-circle" cx="300" cy="440" r="40" fill="#475569" stroke="#64748b" stroke-width="2"/>
+                    <text x="300" y="445" text-anchor="middle" font-weight="600" font-size="16" fill="#e2e8f0">S10</text>
+                    <text x="300" y="465" text-anchor="middle" font-size="12" fill="#94a3b8">₹10</text>
+                </g>
+                <g id="state-S15" class="cursor-pointer">
+                    <circle class="state-circle" cx="80" cy="250" r="40" fill="#475569" stroke="#64748b" stroke-width="2"/>
+                    <text x="80" y="255" text-anchor="middle" font-weight="600" font-size="16" fill="#e2e8f0">S15</text>
+                    <text x="80" y="275" text-anchor="middle" font-size="12" fill="#94a3b8">≥₹15</text>
+                </g>
+
+                <path id="path-S0-S5" class="transition-path" d="M 335,78 A 200 150 0 0 1 485,230" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path id="path-S0-S10" class="transition-path" d="M 300,100 V 400" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path id="path-S5-S10" class="transition-path" d="M 485,270 A 200 150 0 0 1 335,422" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path id="path-S5-S15" class="transition-path" d="M 480,250 H 120" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path id="path-S10-S15" class="transition-path" d="M 265,422 A 200 150 0 0 1 115,270" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path id="path-S10-S0" class="transition-path" d="M 270,420 A 250 250 0 0 1 270,80" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path id="path-S15-S0" class="transition-path" d="M 115,230 A 200 150 0 0 1 265,78" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+            </svg>
+        </div>
+
+        <div class="lg:col-span-2 flex flex-col justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-white mb-2">FSM Controller</h1>
+                <p class="text-slate-400 mb-6">A simulation of the Verilog FSM logic.</p>
+
+                <div class="mb-6 bg-slate-700/50 p-4 rounded-lg">
+                    <h2 class="text-lg font-semibold text-sky-400 mb-2">Current Status</h2>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-300">State:</span>
+                        <span id="current-state-text" class="font-bold text-xl text-white">S0</span>
+                    </div>
+                     <div class="flex justify-between items-center mt-1">
+                        <span class="text-slate-300">Credit:</span>
+                        <span id="credit-text" class="font-bold text-xl text-white">₹0</span>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold text-sky-400 mb-3">Inputs</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button id="insert-5" class="btn bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg">Insert ₹5</button>
+                        <button id="insert-10" class="btn bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg">Insert ₹10</button>
+                        <button id="select-a" class="btn bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg">Select Item A (₹10)</button>
+                        <button id="select-b" class="btn bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg">Select Item B (₹15)</button>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold text-sky-400 mb-3">Outputs</h3>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div id="dispense-a-out" class="output-box bg-slate-700 p-3 rounded-lg">
+                            <span class="block text-sm text-slate-400">Dispense A</span>
+                            <span class="font-bold text-lg">OFF</span>
+                        </div>
+                        <div id="dispense-b-out" class="output-box bg-slate-700 p-3 rounded-lg">
+                            <span class="block text-sm text-slate-400">Dispense B</span>
+                            <span class="font-bold text-lg">OFF</span>
+                        </div>
+                        <div id="change-out" class="output-box bg-slate-700 p-3 rounded-lg">
+                            <span class="block text-sm text-slate-400">Change</span>
+                            <span class="font-bold text-lg">₹0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                 <div id="log-container" class="bg-slate-900 text-sm text-slate-400 p-3 rounded-lg font-mono overflow-y-auto mb-4">
+                    <p id="log-text">> System initialized. Waiting for input...</p>
+                 </div>
+                <button id="reset" class="btn w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg">Reset FSM</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // FSM state variables
+    const STATES = { S0: 0, S5: 1, S10: 2, S15: 3 };
+    const STATE_NAMES = ['S0', 'S5', 'S10', 'S15'];
+    let currentState = STATES.S0;
+    let credit = 0; // Tracks the total money inserted.
+
+    // DOM Elements
+    const stateElements = {
+        S0: document.getElementById('state-S0'),
+        S5: document.getElementById('state-S5'),
+        S10: document.getElementById('state-S10'),
+        S15: document.getElementById('state-S15'),
+    };
+    const pathElements = {
+        'S0-S5': document.getElementById('path-S0-S5'),
+        'S0-S10': document.getElementById('path-S0-S10'),
+        'S5-S10': document.getElementById('path-S5-S10'),
+        'S5-S15': document.getElementById('path-S5-S15'),
+        'S10-S15': document.getElementById('path-S10-S15'), // Added new path for visualization
+        'S10-S0': document.getElementById('path-S10-S0'),
+        'S15-S0': document.getElementById('path-S15-S0'),
+    };
+    const currentStateText = document.getElementById('current-state-text');
+    const creditText = document.getElementById('credit-text');
+    const insert5Btn = document.getElementById('insert-5');
+    const insert10Btn = document.getElementById('insert-10');
+    const selectABtn = document.getElementById('select-a');
+    const selectBBtn = document.getElementById('select-b');
+    const resetBtn = document.getElementById('reset');
+    const dispenseAOut = document.getElementById('dispense-a-out');
+    const dispenseBOut = document.getElementById('dispense-b-out');
+    const changeOut = document.getElementById('change-out');
+    const logText = document.getElementById('log-text');
+    const logContainer = document.getElementById('log-container');
+
+    function updateUI() {
+        // Determine state from credit
+        const oldState = currentState;
+        if (credit >= 15) currentState = STATES.S15;
+        else if (credit >= 10) currentState = STATES.S10;
+        else if (credit >= 5) currentState = STATES.S5;
+        else currentState = STATES.S0;
+
+        // Animate transition if state changed
+        if (oldState !== currentState) {
+            flashTransition(`${STATE_NAMES[oldState]}-${STATE_NAMES[currentState]}`);
+        }
+        
+        // Update state circle highlights
+        Object.values(stateElements).forEach(el => el.classList.remove('current-state'));
+        stateElements[STATE_NAMES[currentState]].classList.add('current-state');
+        
+        // Update text displays
+        currentStateText.textContent = STATE_NAMES[currentState];
+        creditText.textContent = `₹${credit}`;
+
+        // Enable/disable buttons based on credit
+        selectABtn.disabled = (credit < 10);
+        selectBBtn.disabled = (credit < 15);
+    }
+    
+    function flashTransition(pathId) {
+        const path = pathElements[pathId];
+        if (path) {
+            path.classList.add('active-transition');
+            path.setAttribute('marker-end', 'url(#arrowhead-active)');
+            setTimeout(() => {
+                path.classList.remove('active-transition');
+                path.setAttribute('marker-end', 'url(#arrowhead)');
+            }, 600);
+        }
+    }
+
+    function setOutputs(dispA, dispB, change) {
+        const updateOutputBox = (el, active, text) => {
+            el.classList.toggle('output-active', active);
+            el.querySelector('span:last-child').textContent = text;
+        };
+
+        updateOutputBox(dispenseAOut, dispA, dispA ? 'ON' : 'OFF');
+        updateOutputBox(dispenseBOut, dispB, dispB ? 'ON' : 'OFF');
+        updateOutputBox(changeOut, change > 0, `₹${change}`);
+        
+        if (dispA || dispB || change > 0) {
+            setTimeout(() => {
+                 updateOutputBox(dispenseAOut, false, 'OFF');
+                 updateOutputBox(dispenseBOut, false, 'OFF');
+                 updateOutputBox(changeOut, false, '₹0');
+            }, 1500);
+        }
+    }
+
+    function logAction(message) {
+        logText.innerHTML = `> ${message}<br>${logText.innerHTML}`;
+        logContainer.scrollTop = 0;
+    }
+
+    function processFSM(coin = 0, select = null) {
+        let dispA = 0, dispB = 0, change = 0;
+        let logMsg = "";
+        const oldStateBeforePurchase = currentState;
+
+        // --- Step 1: Process Coin Insertion ---
+        if (coin > 0) {
+            credit += coin;
+            logAction(`Inserted ₹${coin}. Total credit: ₹${credit}.`);
+            updateUI(); // Update display and state immediately after coin insert
+            return; // End this action here
+        }
+
+        // --- Step 2: Process Item Selection ---
+        if (select) {
+            switch(STATE_NAMES[currentState]) {
+                case 'S10': // Has at least ₹10, but less than ₹15
+                    if (select === 'A') {
+                        dispA = 1;
+                        change = credit - 10;
+                        logMsg = `Item A selected. Dispensing. Returning ₹${change} change.`;
+                        credit = 0;
+                    }
+                    break;
+
+                case 'S15': // Has at least ₹15
+                    if (select === 'A') {
+                        dispA = 1;
+                        change = credit - 10;
+                        logMsg = `Item A selected. Dispensing. Returning ₹${change} change.`;
+                        credit = 0;
+                    } else if (select === 'B') {
+                        dispB = 1;
+                        change = credit - 15;
+                        logMsg = `Item B selected. Dispensing. Returning ₹${change} change.`;
+                        credit = 0;
+                    }
+                    break;
+            }
+
+            if (logMsg) logAction(logMsg);
+            setOutputs(dispA, dispB, change);
+            
+            // If a purchase was made, animate the transition back to S0
+            if (credit === 0) {
+                 const finalOldStateName = STATE_NAMES[oldStateBeforePurchase];
+                 if (finalOldStateName !== 'S0') {
+                     flashTransition(`${finalOldStateName}-S0`);
+                 }
+            }
+            updateUI();
+        }
+    }
+
+    // Event Listeners
+    insert5Btn.addEventListener('click', () => processFSM(5, null));
+    insert10Btn.addEventListener('click', () => processFSM(10, null));
+    selectABtn.addEventListener('click', () => processFSM(0, 'A'));
+    selectBBtn.addEventListener('click', () => processFSM(0, 'B'));
+    
+    resetBtn.addEventListener('click', () => {
+        const oldState = currentState;
+        credit = 0;
+        setOutputs(0, 0, 0);
+        updateUI();
+        if(STATE_NAMES[oldState] !== 'S0') flashTransition(`${STATE_NAMES[oldState]}-S0`);
+        logAction("FSM Reset to S0.");
+    });
+
+    // Initial setup
+    updateUI();
+});
+</script>
+</body>
+</html>
