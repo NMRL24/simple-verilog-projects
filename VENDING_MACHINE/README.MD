@@ -39,7 +39,7 @@ That's when AI stepped in! Google Gemini helped me convert my Verilog FSM logic 
 
 ```
 vending-machine-fsm/
-├── index.html           # Main simulator page
+├── vending_machine.html           # Main simulator page
 ├── js/
 │   └── fsm.js          # FSM logic
 ├── css/
