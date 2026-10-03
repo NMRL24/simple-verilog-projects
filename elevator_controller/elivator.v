@@ -1,15 +1,12 @@
 `timescale 1ns / 1ps
-
 module elivator(
     input clk, rst,
     input [5:0] req_floor,
     output reg up, dwn, door, stop,
     output [5:0] y
 );
-
 reg [5:0] cf;
 reg [2:0] door_cnt;
-
 always @(posedge clk or posedge rst) begin
     if(rst) begin
         cf <= 6'd0;
@@ -53,7 +50,5 @@ always @(posedge clk or posedge rst) begin
         end
     end
 end
-
 assign y = cf;
-
 endmodule
